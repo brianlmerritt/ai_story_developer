@@ -1,0 +1,11 @@
+styles:
+  - name: "technical"
+    attributes:
+      tone: "precise"
+      detail_level: "high"
+      technical_terms: true
+  - name: "narrative"
+    attributes:
+      tone: "descriptive"
+      detail_level: "medium"
+      character_focus: true

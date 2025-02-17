@@ -1,0 +1,11 @@
+models:
+  - name: "gpt4"
+    type: "completion"
+    settings:
+      temperature: 0.7
+      max_tokens: 2000
+  - name: "claude"
+    type: "completion"
+    settings:
+      temperature: 0.7
+      max_tokens: 2000

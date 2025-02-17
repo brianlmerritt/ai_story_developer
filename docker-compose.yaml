@@ -1,0 +1,58 @@
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/frontend/Dockerfile
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "4444:3000"  # Map container's 3000 to host's 4444
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true
+    command: npm start
+    # Add test command that can be used alternatively
+    # Use: docker-compose run frontend npm test
+    # Or: docker-compose run frontend npm run test:coverage
+
+  backend:
+    build:
+      context: .
+      dockerfile: docker/backend/Dockerfile
+    volumes:
+      - ./backend:/app
+      - ./stories:/app/stories:delegated
+    ports:
+      - "9999:8000"  # Map container's 8000 to host's 9999
+    environment:
+      - POSTGRES_HOST=db
+      - POSTGRES_DB=storydev
+      - POSTGRES_USER=storydev
+      - POSTGRES_PASSWORD=devpassword
+      - PYTHONPATH=/app
+    depends_on:
+      db:
+        condition: service_healthy
+    command: >
+      sh -c "alembic upgrade head &&
+             uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
+
+  db:
+    image: postgres:14-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=storydev
+      - POSTGRES_USER=storydev
+      - POSTGRES_PASSWORD=devpassword
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U storydev"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
