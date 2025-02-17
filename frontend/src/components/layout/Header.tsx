@@ -6,18 +6,22 @@ interface HeaderProps {
   story: string;
   activeSection?: string;
   activeScene?: string;
+  activeChapter?: string;
   onStorySelect: () => void;
   onSectionUp?: () => void;
   onSceneUp?: () => void;
+  onChapterUp?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   story,
   activeSection,
   activeScene,
+  activeChapter,
   onStorySelect,
   onSectionUp,
   onSceneUp,
+  onChapterUp,
 }) => (
   <div className="flex items-center border-b bg-white p-4 shadow-sm">
     <button 
@@ -44,14 +48,14 @@ export const Header: React.FC<HeaderProps> = ({
       </>
     )}
 
-    {activeScene && (
+    {activeChapter && (
       <>
         <span className="mx-2 text-gray-400">/</span>
-        <span className="font-semibold">{activeScene}</span>
-        {onSceneUp && (
+        <span className="font-semibold">{activeChapter}</span>
+        {onChapterUp && (
           <button 
             className="ml-2 rounded-lg p-1 hover:bg-gray-100"
-            onClick={onSceneUp}
+            onClick={onChapterUp}
           >
             <ChevronUp className="h-4 w-4" />
           </button>

@@ -4,39 +4,55 @@ export interface Story {
     title: string;
   }
   
+  export interface Chapter {
+    id: string;
+    title: string;
+    sequence: string;
+    description?: string;
+    novel_id: number;
+  }
+  
   export interface Scene {
     id: string;
     title: string;
     sequence: string;
     description?: string;
+    scene_beats?: string;
     directions?: string;
+    key_details_and_quirks?: string;
+    chapter_id?: string;
+    characters?: Record<string, number>;
+    locations?: Record<string, number>;
   }
   
   export interface Character {
-    id: string;
+    id: number;
     name: string;
-    attributes: {
-      age?: number;
-      occupation?: string;
-      background?: string;
-    };
+    nickname?: string;
+    summary?: string;
+    personality?: string;
+    description?: string;
+    dialogue_style?: string;
+    key_details_and_quirks?: string;
   }
   
   export interface Location {
-    id: string;
+    id: number;
     name: string;
-    description: string;
+    summary?: string;
+    description?: string;
+    key_details_and_quirks?: string;
   }
   
   export interface Discovery {
-    id: string;
+    id: number;
     title: string;
     content: string;
   }
   
   export interface Memory {
-    id: string;
+    id: number;
     title: string;
     content: string;
-    relatedCharacters: string[];
+    relatedCharacters: number[];
   }

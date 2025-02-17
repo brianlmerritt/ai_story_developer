@@ -46,13 +46,13 @@ export const SceneContent: React.FC<SceneContentProps> = ({
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Scene Directions</label>
+                <label className="block text-sm font-medium mb-1">Scene Beats</label>
                 <textarea 
                   className="w-full rounded-lg border p-2"
                   rows={4}
-                  placeholder="Enter scene directions..."
-                  value={scene.directions || ''}
-                  onChange={e => onUpdate({ directions: e.target.value })}
+                  placeholder="Enter scene beats..."
+                  value={scene.scene_beats || ''}
+                  onChange={e => onUpdate({ scene_beats: e.target.value })}
                 />
               </div>
             </div>

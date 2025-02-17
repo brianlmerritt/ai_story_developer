@@ -11,6 +11,9 @@ services:
     environment:
       - NODE_ENV=development
       - CHOKIDAR_USEPOLLING=true
+      - WDS_SOCKET_HOST=192.168.1.185
+      - WDS_SOCKET_PORT=4444
+      - REACT_APP_API_URL=http://192.168.1.185:9999/api
     command: npm start
     # Add test command that can be used alternatively
     # Use: docker-compose run frontend npm test
@@ -31,6 +34,7 @@ services:
       - POSTGRES_USER=storydev
       - POSTGRES_PASSWORD=devpassword
       - PYTHONPATH=/app
+      - CORS_ORIGINS=http://192.168.1.185:4444
     depends_on:
       db:
         condition: service_healthy
