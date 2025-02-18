@@ -1,5 +1,5 @@
 import React from 'react';
-import Select, { MultiValue } from 'react-select';
+import Select, { MultiValue, ActionMeta } from 'react-select';
 
 export interface Option {
   value: string;
@@ -18,38 +18,52 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
   options,
   value,
   onChange,
-  className = '',
-  placeholder = 'Select...',
+  className,
+  placeholder = 'Select...'
 }) => {
+  const handleChange = (
+    newValue: MultiValue<Option>,
+    actionMeta: ActionMeta<Option>
+  ) => {
+    onChange(newValue as Option[]);
+  };
+
   return (
     <Select
       isMulti
       options={options}
       value={value}
-      onChange={(newValue) => onChange(newValue as Option[])}
+      onChange={handleChange}
       className={className}
-      classNamePrefix="react-select"
       placeholder={placeholder}
+      closeMenuOnSelect={false}
+      isSearchable={true}
+      isClearable={true}
       styles={{
         control: (base) => ({
           ...base,
-          borderColor: '#e5e7eb',
+          borderRadius: '0.5rem',
+          borderColor: '#e2e8f0',
           '&:hover': {
-            borderColor: '#e5e7eb'
+            borderColor: '#cbd5e1'
           }
         }),
-        option: (base, state) => ({
+        multiValue: (base) => ({
           ...base,
-          backgroundColor: state.isSelected 
-            ? '#3b82f6' 
-            : state.isFocused 
-              ? '#bfdbfe' 
-              : 'transparent',
-          '&:active': {
-            backgroundColor: '#bfdbfe'
-          }
+          borderRadius: '0.375rem',
+          backgroundColor: '#e2e8f0'
         })
       }}
+      theme={(theme) => ({
+        ...theme,
+        colors: {
+          ...theme.colors,
+          primary: '#3b82f6', // Tailwind blue-500
+          primary75: '#60a5fa', // Tailwind blue-400
+          primary50: '#93c5fd', // Tailwind blue-300
+          primary25: '#bfdbfe', // Tailwind blue-200
+        },
+      })}
     />
   );
 }; 
