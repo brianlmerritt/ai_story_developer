@@ -4,11 +4,14 @@ from typing import List
 from database.database import get_db
 import crud.memory as memory_crud
 from schemas.memory import Memory, MemoryCreate, MemoryUpdate
+import logging
 
 router = APIRouter(
     prefix="/memories",
     tags=["memories"]
 )
+
+logger = logging.getLogger(__name__)
 
 @router.post("/", response_model=Memory)
 def create_memory(memory: MemoryCreate, db: Session = Depends(get_db)):
@@ -16,8 +19,15 @@ def create_memory(memory: MemoryCreate, db: Session = Depends(get_db)):
 
 @router.get("/", response_model=List[Memory])
 def read_memories(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    memories = memory_crud.get_memories(db, skip=skip, limit=limit)
-    return memories
+    try:
+        memories = memory_crud.get_memories(db, skip=skip, limit=limit)
+        return memories
+    except Exception as e:
+        logger.error(f"Error fetching memories: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Internal server error while fetching memories: {str(e)}"
+        )
 
 @router.get("/chapter/{chapter_id}", response_model=List[Memory])
 def read_memories_by_chapter(

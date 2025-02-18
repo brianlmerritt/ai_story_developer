@@ -7,9 +7,11 @@ export interface Story {
   export interface Chapter {
     id: string;
     title: string;
-    sequence: string;
+    summary?: string;
+    sequence?: string;
     description?: string;
     novel_id: number;
+    status?: string;
   }
   
   export interface Scene {

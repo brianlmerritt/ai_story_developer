@@ -14,6 +14,9 @@ import { ChapterList } from './components/chapter/ChapterList';
 import { CHAPTER_NAV_ITEMS } from './types/navigation';
 import { CharacterView } from './components/character/CharacterView';
 import { LocationView } from './components/location/LocationView';
+import ChapterView from './components/chapter/ChapterView';
+import { DiscoveryView } from './components/discovery/DiscoveryView';
+import { MemoryView } from './components/memory/MemoryView';
 
 interface SampleData {
   stories: Novel[];
@@ -25,9 +28,9 @@ const SAMPLE_DATA: SampleData = {
     { id: 1, name: 'AGI Novel', summary: '', description: '', status: 'draft' }
   ],
   scenes: [
-    { id: 'scene-1', title: 'Scene 1: Arrival', sequence: '1', description: '' },
-    { id: 'scene-1a', title: 'Scene 1a: Parking Lot', sequence: '1a', description: '' },
-    { id: 'scene-2', title: 'Scene 2: Entry', sequence: '2', description: '' }
+    { id: 1, title: 'Scene 1: Arrival', sequence: '1', description: '' },
+    { id: 2, title: 'Scene 1a: Parking Lot', sequence: '1a', description: '' },
+    { id: 3, title: 'Scene 2: Entry', sequence: '2', description: '' }
   ]
 };
 
@@ -44,7 +47,7 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [activeChapter, setActiveChapter] = useState<Chapter | null>(null);
 
-  const activeSceneId: string | null = activeScene ? activeScene.id : null;
+  const activeSceneId: number | null = activeScene ? activeScene.id : null;
 
   useEffect(() => {
     loadNovels();
@@ -210,6 +213,16 @@ function App() {
             <LocationView />
           )}
 
+          {/* Discovery View */}
+          {activeSection === 'discoveries' && (
+            <DiscoveryView />
+          )}
+
+          {/* Chapter View */}
+          {activeSection === 'chapters' && (
+            <ChapterView novelId={activeStory.id} />
+          )}
+
           {/* Scene List */}
           {showSceneList && !activeScene && activeSection === 'scenes' && (
             <SceneList
@@ -234,8 +247,13 @@ function App() {
             </div>
           )}
 
+          {/* Memory View */}
+          {activeSection === 'memories' && (
+            <MemoryView />
+          )}
+
           {/* Other Section Content */}
-          {!activeScene && activeSection && !['scenes', 'characters', 'locations'].includes(activeSection) && (
+          {!activeScene && activeSection && !['scenes', 'characters', 'locations', 'chapters'].includes(activeSection) && (
             <div className="p-4">
               <h2 className="text-xl font-semibold mb-4">
                 {activeSection.charAt(0).toUpperCase() + activeSection.slice(1)}

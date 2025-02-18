@@ -38,12 +38,23 @@ export const LocationView: React.FC = () => {
   const handleUpdateLocation = async (data: Partial<Location>) => {
     if (!activeLocation) return;
     try {
-      const updatedLocation = await locationApi.update(activeLocation.id, data);
-      setLocations(prev => prev.map(loc => 
-        loc.id === updatedLocation.id ? updatedLocation : loc
-      ));
+      console.log('Updating location with data:', data);
+      const updatedLocation = await locationApi.update(activeLocation.id, {
+        ...data,
+        status: data.status || activeLocation.status || 'draft',
+      });
+      console.log('Got updated location response:', updatedLocation);
+      setLocations(prev => {
+        console.log('Updating locations state:', prev.map(loc => 
+          loc.id === updatedLocation.id ? updatedLocation : loc
+        ));
+        return prev.map(loc => 
+          loc.id === updatedLocation.id ? updatedLocation : loc
+        );
+      });
       setActiveLocation(updatedLocation);
     } catch (err) {
+      console.error('Failed to update location:', err);
       setError('Failed to update location');
     }
   };

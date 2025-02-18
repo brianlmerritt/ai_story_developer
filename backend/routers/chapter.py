@@ -4,6 +4,11 @@ from typing import List
 from database.database import get_db
 import crud.chapter as chapter_crud
 from schemas.chapter import Chapter, ChapterCreate, ChapterUpdate
+import logging
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 router = APIRouter(
     prefix="/chapters",
@@ -12,7 +17,14 @@ router = APIRouter(
 
 @router.post("/", response_model=Chapter)
 def create_chapter(chapter: ChapterCreate, db: Session = Depends(get_db)):
-    return chapter_crud.create_chapter(db=db, chapter=chapter)
+    # debugging: log received chapter data
+    logger.info(f"Received chapter data: {chapter.dict()}")
+    try:
+        return chapter_crud.create_chapter(db=db, chapter=chapter)
+    except Exception as e:
+        # debugging: log chapter creation error
+        logger.error(f"Error creating chapter: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/", response_model=List[Chapter])
 def read_chapters(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):

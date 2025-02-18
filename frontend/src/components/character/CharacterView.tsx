@@ -38,12 +38,17 @@ export const CharacterView: React.FC = () => {
   const handleUpdateCharacter = async (data: Partial<Character>) => {
     if (!activeCharacter) return;
     try {
-      const updatedCharacter = await characterApi.update(activeCharacter.id, data);
+      console.log('Updating character with data:', data);
+      const updatedCharacter = await characterApi.update(activeCharacter.id, {
+        ...data,
+        status: data.status || activeCharacter.status || 'draft',
+      });
       setCharacters(prev => prev.map(char => 
         char.id === updatedCharacter.id ? updatedCharacter : char
       ));
       setActiveCharacter(updatedCharacter);
     } catch (err) {
+      console.error('Failed to update character:', err);
       setError('Failed to update character');
     }
   };

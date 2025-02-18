@@ -16,7 +16,18 @@ def get_chapters_by_novel(db: Session, novel_id: int, skip: int = 0, limit: int 
         .all()
 
 def create_chapter(db: Session, chapter: ChapterCreate):
-    db_chapter = Chapter(**chapter.model_dump())
+    # Add debug logging
+    chapter_data = chapter.model_dump()
+    print(f"Creating chapter with data: {chapter_data}")
+    
+    db_chapter = Chapter(
+        title=chapter_data['title'],
+        summary=chapter_data.get('summary'),
+        sequence=chapter_data.get('sequence'),
+        description=chapter_data.get('description'),
+        novel_id=chapter_data['novel_id'],
+        status=chapter_data.get('status')
+    )
     db.add(db_chapter)
     db.commit()
     db.refresh(db_chapter)

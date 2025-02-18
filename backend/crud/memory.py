@@ -54,10 +54,13 @@ def update_memory(db: Session, memory_id: int, memory: MemoryUpdate):
     db_memory = get_memory(db, memory_id)
     if db_memory:
         update_data = memory.model_dump(exclude_unset=True)
+        print("Updating memory with data:", update_data)  # Debug
         for key, value in update_data.items():
+            print(f"Setting {key} = {value}")  # Debug
             setattr(db_memory, key, value)
         db.commit()
         db.refresh(db_memory)
+        print("Updated memory:", db_memory.__dict__)  # Debug
     return db_memory
 
 def delete_memory(db: Session, memory_id: int):

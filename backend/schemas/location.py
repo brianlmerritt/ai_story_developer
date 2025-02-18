@@ -6,6 +6,7 @@ class LocationBase(BaseModel):
     summary: Optional[str] = None
     description: Optional[str] = None
     key_details_and_quirks: Optional[str] = None
+    status: Optional[str] = None
 
 class LocationCreate(LocationBase):
     pass
@@ -15,6 +16,7 @@ class LocationUpdate(BaseModel):
     summary: Optional[str] = None
     description: Optional[str] = None
     key_details_and_quirks: Optional[str] = None
+    status: Optional[str] = None
 
 class Location(LocationBase):
     id: int

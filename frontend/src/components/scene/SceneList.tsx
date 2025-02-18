@@ -5,7 +5,7 @@ import type { Scene } from '../../types';
 
 interface SceneListProps {
   scenes: Scene[];
-  activeScene: string | null;  // Remove optional (?) and add null explicitly
+  activeScene: number | null;  // Changed from string | null
   onSceneSelect: (scene: Scene) => void;
   onAddScene: () => void;
 }

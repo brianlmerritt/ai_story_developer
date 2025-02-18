@@ -1,5 +1,7 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, Literal
+
+StatusType = Literal['draft', 'review', 'published', 'deleted', '']
 
 class CharacterBase(BaseModel):
     name: str
@@ -9,6 +11,7 @@ class CharacterBase(BaseModel):
     description: Optional[str] = None
     dialogue_style: Optional[str] = None
     key_details_and_quirks: Optional[str] = None
+    status: Optional[StatusType] = 'draft'
 
 class CharacterCreate(CharacterBase):
     pass
@@ -21,6 +24,7 @@ class CharacterUpdate(BaseModel):
     description: Optional[str] = None
     dialogue_style: Optional[str] = None
     key_details_and_quirks: Optional[str] = None
+    status: Optional[StatusType] = None
 
 class Character(CharacterBase):
     id: int

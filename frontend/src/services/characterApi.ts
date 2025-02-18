@@ -24,6 +24,7 @@ export const characterApi = {
   },
 
   async update(id: number, character: CharacterUpdate): Promise<Character> {
+    console.log('Sending character update:', character);
     const response = await fetch(`${API_BASE_URL}/characters/${id}`, {
       method: 'PUT',
       headers: {
@@ -31,7 +32,11 @@ export const characterApi = {
       },
       body: JSON.stringify(character),
     });
-    if (!response.ok) throw new Error('Failed to update character');
+    if (!response.ok) {
+      const error = await response.text();
+      console.error('Character update failed:', error);
+      throw new Error('Failed to update character');
+    }
     return response.json();
   },
 

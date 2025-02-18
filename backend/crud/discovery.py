@@ -32,10 +32,13 @@ def update_discovery(db: Session, discovery_id: int, discovery: DiscoveryUpdate)
     db_discovery = get_discovery(db, discovery_id)
     if db_discovery:
         update_data = discovery.model_dump(exclude_unset=True)
+        print("Updating discovery with data:", update_data)  # Debug
         for key, value in update_data.items():
+            print(f"Setting {key} = {value}")  # Debug
             setattr(db_discovery, key, value)
         db.commit()
         db.refresh(db_discovery)
+        print("Updated discovery:", db_discovery.__dict__)  # Debug
     return db_discovery
 
 def delete_discovery(db: Session, discovery_id: int):

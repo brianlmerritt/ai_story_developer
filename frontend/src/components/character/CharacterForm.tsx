@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { Character } from '../../types';
 import { AutoResizeTextarea } from '../shared/AutoResizeTextarea';
+import { StatusSelect, type Status } from '../shared/StatusSelect';
 
 interface CharacterFormProps {
   character?: Character | null;
@@ -21,12 +22,17 @@ export const CharacterForm: React.FC<CharacterFormProps> = ({
     description: '',
     dialogue_style: '',
     key_details_and_quirks: '',
+    status: 'draft' as Status,
+    ...character,
   });
 
   // Update form data when character changes
   useEffect(() => {
     if (character) {
-      setFormData(character);
+      setFormData({
+        ...character,
+        status: character.status || 'draft' as Status,
+      });
     } else {
       setFormData({
         name: '',
@@ -36,37 +42,49 @@ export const CharacterForm: React.FC<CharacterFormProps> = ({
         description: '',
         dialogue_style: '',
         key_details_and_quirks: '',
+        status: 'draft' as Status,
       });
     }
   }, [character]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+    onSubmit({
+      ...formData,
+      status: formData.status || 'draft',
+    });
   };
 
-  const handleChange = (field: keyof Character) => (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: e.target.value
-    }));
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   return (
     <form onSubmit={handleSubmit} className="p-6 h-full overflow-auto">
       <div className="max-w-4xl mx-auto space-y-4">
-        <div>
-          <label className="block text-sm font-medium mb-1">Name</label>
-          <input
-            type="text"
-            name="name"
-            value={formData.name || ''}
-            onChange={handleChange('name')}
-            className="w-full rounded-lg border p-2"
-            required
-          />
+        <div className="flex gap-4">
+          <div className="flex-1">
+            <label className="block text-sm font-medium text-gray-700">Name</label>
+            <input
+              type="text"
+              name="name"
+              value={formData.name || ''}
+              onChange={handleChange}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              required
+            />
+          </div>
+          <div className="flex-1">
+            <label className="block text-sm font-medium text-gray-700">Status</label>
+            <StatusSelect
+              value={formData.status || ''}
+              onChange={(status) => setFormData(prev => ({ ...prev, status }))}
+              className="mt-1"
+            />
+          </div>
         </div>
         <div>
           <label className="block text-sm font-medium mb-1">Nickname</label>
@@ -74,7 +92,7 @@ export const CharacterForm: React.FC<CharacterFormProps> = ({
             type="text"
             name="nickname"
             value={formData.nickname || ''}
-            onChange={handleChange('nickname')}
+            onChange={handleChange}
             className="w-full rounded-lg border p-2"
           />
         </div>
@@ -83,7 +101,7 @@ export const CharacterForm: React.FC<CharacterFormProps> = ({
           <AutoResizeTextarea
             name="summary"
             value={formData.summary || ''}
-            onChange={handleChange('summary')}
+            onChange={handleChange}
             className="w-full rounded-lg border p-2 resize-y min-h-[3em]"
             minRows={3}
           />
@@ -93,7 +111,7 @@ export const CharacterForm: React.FC<CharacterFormProps> = ({
           <AutoResizeTextarea
             name="personality"
             value={formData.personality || ''}
-            onChange={handleChange('personality')}
+            onChange={handleChange}
             className="w-full rounded-lg border p-2 resize-y min-h-[3em]"
             minRows={3}
           />
@@ -103,7 +121,7 @@ export const CharacterForm: React.FC<CharacterFormProps> = ({
           <AutoResizeTextarea
             name="description"
             value={formData.description || ''}
-            onChange={handleChange('description')}
+            onChange={handleChange}
             className="w-full rounded-lg border p-2 resize-y min-h-[3em]"
             minRows={3}
           />
@@ -113,7 +131,7 @@ export const CharacterForm: React.FC<CharacterFormProps> = ({
           <AutoResizeTextarea
             name="dialogue_style"
             value={formData.dialogue_style || ''}
-            onChange={handleChange('dialogue_style')}
+            onChange={handleChange}
             className="w-full rounded-lg border p-2 resize-y min-h-[3em]"
             minRows={3}
           />
@@ -123,7 +141,7 @@ export const CharacterForm: React.FC<CharacterFormProps> = ({
           <AutoResizeTextarea
             name="key_details_and_quirks"
             value={formData.key_details_and_quirks || ''}
-            onChange={handleChange('key_details_and_quirks')}
+            onChange={handleChange}
             className="w-full rounded-lg border p-2 resize-y min-h-[3em]"
             minRows={3}
           />

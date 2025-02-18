@@ -10,6 +10,7 @@ class SceneBase(BaseModel):
     chapter_id: int
     characters: Optional[Dict[str, int]] = None  # Dictionary of nickname:character_id
     locations: Optional[Dict[str, int]] = None   # Dictionary of name:location_id
+    status: Optional[str] = None
 
 class SceneCreate(SceneBase):
     pass
@@ -23,6 +24,7 @@ class SceneUpdate(BaseModel):
     chapter_id: Optional[int] = None
     characters: Optional[Dict[str, int]] = None
     locations: Optional[Dict[str, int]] = None
+    status: Optional[str] = None
 
 class Scene(SceneBase):
     id: int

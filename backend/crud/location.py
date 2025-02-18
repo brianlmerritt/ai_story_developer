@@ -22,10 +22,13 @@ def update_location(db: Session, location_id: int, location: LocationUpdate):
     db_location = get_location(db, location_id)
     if db_location:
         update_data = location.model_dump(exclude_unset=True)
+        print("Updating location with data:", update_data)  # Debug
         for key, value in update_data.items():
+            print(f"Setting {key} = {value}")  # Debug
             setattr(db_location, key, value)
         db.commit()
         db.refresh(db_location)
+        print("Updated location:", db_location.__dict__)  # Debug
     return db_location
 
 def delete_location(db: Session, location_id: int):

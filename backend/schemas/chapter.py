@@ -2,8 +2,9 @@ from pydantic import BaseModel
 from typing import Optional
 
 class ChapterBase(BaseModel):
-    name: str
+    title: str
     summary: Optional[str] = None
+    sequence: Optional[str] = None  # Optional ordering (e.g., "1", "2", "2.1", etc.)
     description: Optional[str] = None
     novel_id: int
     status: Optional[str] = None
@@ -12,8 +13,9 @@ class ChapterCreate(ChapterBase):
     pass
 
 class ChapterUpdate(BaseModel):
-    name: Optional[str] = None
+    title: Optional[str] = None
     summary: Optional[str] = None
+    sequence: Optional[str] = None
     description: Optional[str] = None
     status: Optional[str] = None
 
