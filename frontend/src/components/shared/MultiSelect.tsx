@@ -66,4 +66,4 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
       })}
     />
   );
-}; 
+};
