@@ -4,6 +4,9 @@ from typing import List, Optional
 from database.database import get_db
 import crud.scene as scene_crud
 from schemas.scene import Scene, SceneCreate, SceneUpdate
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(
     prefix="/scenes",
@@ -65,9 +68,13 @@ def read_scenes_by_location(
 
 @router.get("/{scene_id}", response_model=Scene)
 def read_scene(scene_id: int, db: Session = Depends(get_db)):
+    logger.info("*" * 50)
+    logger.info(f"GET REQUEST for scene {scene_id}")
+    logger.info("*" * 50)
     db_scene = scene_crud.get_scene(db, scene_id=scene_id)
     if db_scene is None:
         raise HTTPException(status_code=404, detail="Scene not found")
+    logger.info(f"Returning scene data: {db_scene.__dict__}")
     return db_scene
 
 @router.put("/{scene_id}", response_model=Scene)
@@ -76,6 +83,10 @@ def update_scene(
     scene: SceneUpdate, 
     db: Session = Depends(get_db)
 ):
+    logger.info("*" * 50)
+    logger.info(f"PUT REQUEST for scene {scene_id}")
+    logger.info(f"Update data: {scene.model_dump()}")
+    logger.info("*" * 50)
     db_scene = scene_crud.update_scene(
         db, scene_id=scene_id, scene=scene
     )

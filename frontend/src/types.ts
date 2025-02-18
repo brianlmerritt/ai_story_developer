@@ -18,6 +18,10 @@ export interface Scene {
   status?: string;
   description?: string;
   scene_beats?: string;
+  characters: Record<string, number>;  // Dictionary of nickname:character_id
+  locations: Record<string, number>;   // Dictionary of name:location_id
+  discoveries: Record<string, number>; // Dictionary of name:discovery_id
+  memories: Record<string, number>;    // Dictionary of title:memory_id
 }
 
 export interface Character {

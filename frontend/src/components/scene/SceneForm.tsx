@@ -17,11 +17,11 @@ interface SceneFormProps {
 
 export const SceneForm: React.FC<SceneFormProps> = ({
   scene,
-  chapters,
-  characters,
-  locations,
-  discoveries,
-  memories,
+  chapters = [],
+  characters = [],
+  locations = [],
+  discoveries = [],
+  memories = [],
   onSubmit,
   onCancel,
 }) => {
@@ -30,12 +30,14 @@ export const SceneForm: React.FC<SceneFormProps> = ({
     content: '',
     summary: '',
     sequence: '',
-    chapter_id: chapters[0].id,
+    chapter_id: undefined,
     status: 'draft' as Status,
     description: '',
     scene_beats: '',
     characters: {},
     locations: {},
+    discoveries: {},
+    memories: {},
   });
 
   useEffect(() => {
@@ -44,21 +46,17 @@ export const SceneForm: React.FC<SceneFormProps> = ({
         ...scene,
         status: scene.status || 'draft' as Status,
       });
-    } else {
-      setFormData({
-        name: '',
-        content: '',
-        summary: '',
-        sequence: '',
-        chapter_id: chapters[0].id,
-        status: 'draft' as Status,
-        description: '',
-        scene_beats: '',
-        characters: {},
-        locations: {},
-      });
     }
-  }, [scene, chapters]);
+  }, [scene]);
+
+  useEffect(() => {
+    if (!scene && chapters.length > 0 && !formData.chapter_id) {
+      setFormData(prev => ({
+        ...prev,
+        chapter_id: chapters[0].id
+      }));
+    }
+  }, [chapters, scene]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

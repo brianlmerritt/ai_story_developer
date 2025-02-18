@@ -44,7 +44,9 @@ def get_memories_by_discovery(db: Session, discovery_id: int, skip: int = 0, lim
         .all()
 
 def create_memory(db: Session, memory: MemoryCreate):
-    db_memory = Memory(**memory.model_dump())
+    data = memory.model_dump()
+    print("Creating memory with data:", data)  # Debug print
+    db_memory = Memory(**data)
     db.add(db_memory)
     db.commit()
     db.refresh(db_memory)

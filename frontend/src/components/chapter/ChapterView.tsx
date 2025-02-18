@@ -4,7 +4,11 @@ import { ChapterForm } from './ChapterForm';
 import { SceneForm } from '../scene/SceneForm';
 import { chapterApi } from '../../services/chapterApi';
 import { sceneApi } from '../../services/sceneApi';
-import type { Chapter, Scene } from '../../types';
+import { characterApi } from '../../services/characterApi';
+import { locationApi } from '../../services/locationApi';
+import { discoveryApi } from '../../services/discoveryApi';
+import { memoryApi } from '../../services/memoryApi';
+import type { Chapter, Scene, Character, Location, Discovery, Memory } from '../../types';
 
 export interface ChapterViewProps {
   novelId: number;
@@ -17,10 +21,15 @@ export const ChapterView: React.FC<ChapterViewProps> = ({ novelId }) => {
   const [activeScene, setActiveScene] = useState<Scene | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [characters, setCharacters] = useState<Character[]>([]);
+  const [locations, setLocations] = useState<Location[]>([]);
+  const [discoveries, setDiscoveries] = useState<Discovery[]>([]);
+  const [memories, setMemories] = useState<Memory[]>([]);
 
   useEffect(() => {
     loadChapters();
     loadScenes();
+    loadRelatedData();
   }, []);
 
   const loadChapters = async () => {
@@ -40,6 +49,24 @@ export const ChapterView: React.FC<ChapterViewProps> = ({ novelId }) => {
       setScenes(data);
     } catch (err) {
       console.error('Failed to load scenes:', err);
+    }
+  };
+
+  const loadRelatedData = async () => {
+    try {
+      const [chars, locs, discs, mems] = await Promise.all([
+        characterApi.list(),
+        locationApi.list(),
+        discoveryApi.list(),
+        memoryApi.list()
+      ]);
+      
+      setCharacters(chars);
+      setLocations(locs);
+      setDiscoveries(discs);
+      setMemories(mems);
+    } catch (err) {
+      console.error('Failed to load related data:', err);
     }
   };
 
@@ -142,7 +169,11 @@ export const ChapterView: React.FC<ChapterViewProps> = ({ novelId }) => {
                 <h2 className="text-lg font-medium mb-4">Scene Details</h2>
                 <SceneForm
                   scene={activeScene}
-                  chapterId={activeChapter.id}
+                  chapters={chapters}
+                  characters={characters}
+                  locations={locations}
+                  discoveries={discoveries}
+                  memories={memories}
                   onSubmit={activeScene ? handleUpdateScene : handleCreateScene}
                   onCancel={() => setActiveScene(null)}
                 />

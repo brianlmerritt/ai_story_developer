@@ -17,27 +17,14 @@ import { LocationView } from './components/location/LocationView';
 import ChapterView from './components/chapter/ChapterView';
 import { DiscoveryView } from './components/discovery/DiscoveryView';
 import { MemoryView } from './components/memory/MemoryView';
-
-interface SampleData {
-  stories: Novel[];
-  scenes: Scene[];
-}
-
-const SAMPLE_DATA: SampleData = {
-  stories: [
-    { id: 1, name: 'AGI Novel', summary: '', description: '', status: 'draft' }
-  ],
-  scenes: [
-    { id: 1, title: 'Scene 1: Arrival', sequence: '1', description: '' },
-    { id: 2, title: 'Scene 1a: Parking Lot', sequence: '1a', description: '' },
-    { id: 3, title: 'Scene 2: Entry', sequence: '2', description: '' }
-  ]
-};
+import { characterApi } from './services/characterApi';
+import { locationApi } from './services/locationApi';
+import { discoveryApi } from './services/discoveryApi';
 
 function App() {
   const [showStorySelector, setShowStorySelector] = useState(false);
   const [showSceneList, setShowSceneList] = useState(true);
-  const [activeStory, setActiveStory] = useState<Novel>(SAMPLE_DATA.stories[0]);
+  const [activeStory, setActiveStory] = useState<Novel | null>(null);
   const [activeScene, setActiveScene] = useState<Scene | null>(null);
   const [activeSection, setActiveSection] = useState<NavSection | null>(null);
   const [activeFilters, setActiveFilters] = useState<NavSection[]>([]);
@@ -46,6 +33,9 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeChapter, setActiveChapter] = useState<Chapter | null>(null);
+  const [characters, setCharacters] = useState<Character[]>([]);
+  const [locations, setLocations] = useState<Location[]>([]);
+  const [discoveries, setDiscoveries] = useState<Discovery[]>([]);
 
   const activeSceneId: number | null = activeScene ? activeScene.id : null;
 
@@ -81,10 +71,29 @@ function App() {
     setShowStorySelector(true);
   };
 
-  const handleSceneSelect = (scene: Scene) => {
+  const handleSceneSelect = async (scene: Scene) => {
+    console.log('Scene selected:', scene);
     setActiveScene(scene);
     setShowSceneList(false);
     setActiveSection('scenes');
+
+    try {
+      // Load all related data in parallel
+      const [chars, locs, discs] = await Promise.all([
+        characterApi.list(),
+        locationApi.list(),
+        discoveryApi.list()
+      ]);
+
+      console.log('Loaded data:', { chars, locs, discs });
+      
+      setCharacters(chars);
+      setLocations(locs);
+      setDiscoveries(discs);
+    } catch (error) {
+      console.error('Failed to load scene related data:', error);
+      // Optionally set some error state
+    }
   };
 
   const handleSceneUp = () => {
@@ -179,7 +188,7 @@ function App() {
       {/* Main Content Area */}
       <div className="flex-1">
         <Header 
-          story={activeStory.name}
+          story={activeStory?.name}
           activeChapter={activeChapter?.title}
           onStorySelect={handleStorySelect}
           onChapterUp={activeChapter ? handleChapterUp : undefined}
@@ -220,13 +229,13 @@ function App() {
 
           {/* Chapter View */}
           {activeSection === 'chapters' && (
-            <ChapterView novelId={activeStory.id} />
+            <ChapterView novelId={activeStory?.id} />
           )}
 
           {/* Scene List */}
           {showSceneList && !activeScene && activeSection === 'scenes' && (
             <SceneList
-              scenes={SAMPLE_DATA.scenes}
+              scenes={[]}
               activeScene={activeSceneId}
               onSceneSelect={handleSceneSelect}
               onAddScene={() => {}}

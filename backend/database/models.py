@@ -70,14 +70,19 @@ class Scene(Base):
     name = Column(String, index=True)
     summary = Column(Text)
     description = Column(Text)
+    content = Column(Text)
+    sequence = Column(String)
     key_details_and_quirks = Column(Text)
     scene_beats = Column(Text)
     chapter_id = Column(Integer, ForeignKey("chapters.id"))
     characters = Column(JSON)  # Dictionary of nickname:character_id
     locations = Column(JSON)   # Dictionary of name:location_id
+    discoveries = Column(JSON) # Dictionary of name:discovery_id
+    memories = Column(JSON)    # Dictionary of title:memory_id
+    status = Column(String, server_default='draft')
 
     chapter = relationship("Chapter", back_populates="scenes")
-    memories = relationship("Memory", back_populates="scene")
+    scene_memories = relationship("Memory", back_populates="scene")
 
 class Memory(Base):
     __tablename__ = "memories"
@@ -92,6 +97,7 @@ class Memory(Base):
     characters = Column(JSON)
     locations = Column(JSON)
     discoveries = Column(JSON)
+    status = Column(String, server_default='draft')
 
     chapter = relationship("Chapter", back_populates="memories")
-    scene = relationship("Scene", back_populates="memories") 
+    scene = relationship("Scene", back_populates="scene_memories") 

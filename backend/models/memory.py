@@ -14,4 +14,4 @@ class Memory(Base):
     characters = Column(JSON)
     locations = Column(JSON)
     discoveries = Column(JSON)
-    status = Column(String, server_default='draft') 
+    status = Column(String, server_default='draft')

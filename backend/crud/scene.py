@@ -1,6 +1,9 @@
 from sqlalchemy.orm import Session
 from database.models import Scene
 from schemas.scene import SceneCreate, SceneUpdate
+import logging
+
+logger = logging.getLogger(__name__)
 
 def get_scene(db: Session, scene_id: int):
     return db.query(Scene).filter(Scene.id == scene_id).first()
@@ -40,10 +43,32 @@ def update_scene(db: Session, scene_id: int, scene: SceneUpdate):
     db_scene = get_scene(db, scene_id)
     if db_scene:
         update_data = scene.model_dump(exclude_unset=True)
+        logger.info("=== SCENE UPDATE DEBUG ===")
+        logger.info(f"Scene ID: {scene_id}")
+        logger.info(f"Update data received: {update_data}")
+        logger.info("Current scene data:")
+        logger.info({
+            'characters': db_scene.characters,
+            'locations': db_scene.locations,
+            'discoveries': db_scene.discoveries,
+            'memories': db_scene.memories
+        })
+        
         for key, value in update_data.items():
+            logger.info(f"Setting {key} = {value}")
             setattr(db_scene, key, value)
+        
         db.commit()
         db.refresh(db_scene)
+        
+        logger.info("Updated scene data:")
+        logger.info({
+            'characters': db_scene.characters,
+            'locations': db_scene.locations,
+            'discoveries': db_scene.discoveries,
+            'memories': db_scene.memories
+        })
+        logger.info("=== END SCENE UPDATE DEBUG ===")
     return db_scene
 
 def delete_scene(db: Session, scene_id: int):

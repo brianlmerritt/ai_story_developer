@@ -5,6 +5,15 @@ from routers import novel, chapter, character, location, discovery, scene, memor
 from database.database import engine
 import database.models as models
 import os
+import logging
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+
+logger = logging.getLogger(__name__)
 
 # Create database tables
 models.Base.metadata.create_all(bind=engine)
@@ -32,6 +41,10 @@ app.include_router(location.router, prefix="/api")
 app.include_router(discovery.router, prefix="/api")
 app.include_router(scene.router, prefix="/api")
 app.include_router(memory.router, prefix="/api")
+
+logger.info("=" * 50)
+logger.info("FastAPI Starting Up")
+logger.info("=" * 50)
 
 @app.get("/")
 async def read_root():
