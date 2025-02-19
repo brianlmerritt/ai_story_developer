@@ -1,5 +1,5 @@
 // src/App.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Header } from './components/layout/Header';
 import { SceneList } from './components/scene/SceneList';
 import { SceneContent } from './components/scene/SceneContent';
@@ -20,6 +20,14 @@ import { MemoryView } from './components/memory/MemoryView';
 import { characterApi } from './services/characterApi';
 import { locationApi } from './services/locationApi';
 import { discoveryApi } from './services/discoveryApi';
+import { AIWizard } from './components/ai/AIWizard';
+
+// Add this type definition
+type ActiveForm = {
+  type: 'scene' | 'chapter' | 'character' | 'location' | 'discovery' | 'memory' | 'novel';
+  data: any;
+  formRef: React.RefObject<HTMLFormElement>;
+};
 
 function App() {
   const [showStorySelector, setShowStorySelector] = useState(false);
@@ -36,6 +44,11 @@ function App() {
   const [characters, setCharacters] = useState<Character[]>([]);
   const [locations, setLocations] = useState<Location[]>([]);
   const [discoveries, setDiscoveries] = useState<Discovery[]>([]);
+  const [activeForm, setActiveForm] = useState<ActiveForm | null>(null);
+  const [isAIWizardOpen, setIsAIWizardOpen] = useState(false);
+
+  // Add this ref to pass to form components
+  const formRef = useRef<HTMLFormElement>(null);
 
   const activeSceneId: number | null = activeScene ? activeScene.id : null;
 
@@ -134,6 +147,26 @@ function App() {
     setActiveChapter(null);
   };
 
+  // Update the form activation handler to also open the wizard
+  const handleFormActivate = (
+    type: ActiveForm['type'], 
+    data: any, 
+    formRef: React.RefObject<HTMLFormElement>
+  ) => {
+    console.log('App: Form activation with ref:', formRef.current);
+    setActiveForm({
+      type,
+      data,
+      formRef
+    });
+    setIsAIWizardOpen(true);
+  };
+
+  // Example handler to clear active form
+  const handleFormDeactivate = () => {
+    setActiveForm(null);
+  };
+
   return (
     <div className="flex h-screen bg-white">
       {/* Story Selector */}
@@ -229,7 +262,11 @@ function App() {
 
           {/* Chapter View */}
           {activeSection === 'chapters' && (
-            <ChapterView novelId={activeStory?.id} />
+            <ChapterView 
+              novelId={activeStory?.id}
+              onFormActivate={handleFormActivate}
+              onFormDeactivate={handleFormDeactivate}
+            />
           )}
 
           {/* Scene List */}
@@ -272,6 +309,18 @@ function App() {
           )}
         </div>
       </div>
+
+      {/* Add AIWizard component */}
+      {activeForm && (
+        <AIWizard
+          formType={activeForm.type}
+          formData={activeForm.data}
+          formRef={activeForm.formRef}
+          isOpen={isAIWizardOpen}
+          onOpen={() => setIsAIWizardOpen(true)}
+          onClose={() => setIsAIWizardOpen(false)}
+        />
+      )}
     </div>
   );
 }

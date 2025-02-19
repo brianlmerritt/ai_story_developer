@@ -23,5 +23,5 @@ def test_openapi_schema(client: TestClient):
     assert response.status_code == 200
     schema = response.json()
     assert "paths" in schema
-    assert "/novels/" in schema["paths"]
-    assert "/novels/{novel_id}" in schema["paths"] 
+    assert "/api/novels/" in schema["paths"]
+    assert "/api/novels/{novel_id}" in schema["paths"] 

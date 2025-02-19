@@ -38,9 +38,17 @@ def client(test_db):
         finally:
             test_db.close()
     
+    # Override the database dependency
     app.dependency_overrides[get_db] = override_get_db
     
-    with TestClient(app) as test_client:
-        yield test_client
+    # Create test client
+    test_client = TestClient(app)
     
+    # Verify the app is working (health check is at root level)
+    response = test_client.get("/health")
+    assert response.status_code == 200, "API health check failed"
+    
+    yield test_client
+    
+    # Clear dependency overrides
     app.dependency_overrides.clear() 

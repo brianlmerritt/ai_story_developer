@@ -12,7 +12,7 @@ def test_create_character(client: TestClient):
         "key_details_and_quirks": "Always carries a pocket watch"
     }
     
-    response = client.post("/characters/", json=character_data)
+    response = client.post("/api/characters/", json=character_data)
     assert response.status_code == 200
     data = response.json()
     assert data["name"] == character_data["name"]
@@ -36,11 +36,11 @@ def test_create_duplicate_character(client: TestClient):
 def test_get_character(client: TestClient):
     # Create a character first
     character_data = {"name": "Test Character"}
-    response = client.post("/characters/", json=character_data)
+    response = client.post("/api/characters/", json=character_data)
     created_character = response.json()
     
     # Test getting the character
-    response = client.get(f"/characters/{created_character['id']}")
+    response = client.get(f"/api/characters/{created_character['id']}")
     assert response.status_code == 200
     data = response.json()
     assert data["name"] == character_data["name"]

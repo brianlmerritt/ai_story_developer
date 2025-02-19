@@ -4,15 +4,15 @@ from fastapi.testclient import TestClient
 @pytest.fixture
 def test_chapter(client: TestClient):
     # Create a novel first
-    novel_response = client.post("/novels/", json={"name": "Test Novel"})
+    novel_response = client.post("/api/novels/", json={"name": "Test Novel"})
     novel = novel_response.json()
     
     # Create a chapter
     chapter_data = {
-        "name": "Test Chapter",
+        "title": "Test Chapter",
         "novel_id": novel["id"]
     }
-    response = client.post("/chapters/", json=chapter_data)
+    response = client.post("/api/chapters/", json=chapter_data)
     return response.json()
 
 def test_create_scene(client: TestClient, test_chapter):
@@ -22,12 +22,12 @@ def test_create_scene(client: TestClient, test_chapter):
         "description": "A dimly lit tavern with mysterious patrons",
         "key_details_and_quirks": "Creaky floorboards, flickering candles",
         "scene_beats": "1. Hero enters\n2. Meets mysterious stranger\n3. Receives quest",
-        "chapter_id": test_chapter["id"],
+        "chapter_id": int(test_chapter["id"]),
         "characters": {"hero": 1, "stranger": 2},
         "locations": {"tavern": 1}
     }
     
-    response = client.post("/scenes/", json=scene_data)
+    response = client.post("/api/scenes/", json=scene_data)
     assert response.status_code == 200
     data = response.json()
     assert data["name"] == scene_data["name"]
@@ -47,9 +47,9 @@ def test_get_scenes_by_chapter(client: TestClient, test_chapter):
     ]
     
     for scene in scenes:
-        client.post("/scenes/", json=scene)
+        client.post("/api/scenes/", json=scene)
     
-    response = client.get(f"/scenes/chapter/{test_chapter['id']}")
+    response = client.get(f"/api/scenes/chapter/{test_chapter['id']}")
     assert response.status_code == 200
     data = response.json()
     assert len(data) == len(scenes)
@@ -62,7 +62,7 @@ def test_update_scene(client: TestClient, test_chapter):
         "chapter_id": test_chapter["id"],
         "characters": {"hero": 1}
     }
-    response = client.post("/scenes/", json=scene_data)
+    response = client.post("/api/scenes/", json=scene_data)
     created_scene = response.json()
     
     # Test updating the scene
@@ -72,7 +72,7 @@ def test_update_scene(client: TestClient, test_chapter):
         "characters": {"hero": 1, "villain": 2}
     }
     response = client.put(
-        f"/scenes/{created_scene['id']}", 
+        f"/api/scenes/{created_scene['id']}", 
         json=update_data
     )
     assert response.status_code == 200
@@ -103,17 +103,17 @@ def test_search_scenes(client: TestClient, test_chapter):
     ]
     
     for scene in scenes:
-        client.post("/scenes/", json=scene)
+        client.post("/api/scenes/", json=scene)
     
     # Test search by name
-    response = client.get("/scenes/?search=Fight")
+    response = client.get("/api/scenes/?search=Fight")
     assert response.status_code == 200
     data = response.json()
     assert len(data) == 1
     assert data[0]["name"] == "Tavern Fight"
     
     # Test search by scene beats
-    response = client.get("/scenes/?search=marketplace")
+    response = client.get("/api/scenes/?search=marketplace")
     assert response.status_code == 200
     data = response.json()
     assert len(data) == 1
@@ -125,13 +125,13 @@ def test_delete_scene(client: TestClient, test_chapter):
         "name": "To Be Deleted",
         "chapter_id": test_chapter["id"]
     }
-    response = client.post("/scenes/", json=scene_data)
+    response = client.post("/api/scenes/", json=scene_data)
     created_scene = response.json()
     
     # Delete the scene
-    response = client.delete(f"/scenes/{created_scene['id']}")
+    response = client.delete(f"/api/scenes/{created_scene['id']}")
     assert response.status_code == 200
     
     # Verify scene is deleted
-    response = client.get(f"/scenes/{created_scene['id']}")
+    response = client.get(f"/api/scenes/{created_scene['id']}")
     assert response.status_code == 404 

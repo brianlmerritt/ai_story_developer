@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ChapterList } from './ChapterList';
 import { ChapterForm } from './ChapterForm';
 import { SceneForm } from '../scene/SceneForm';
@@ -10,11 +10,17 @@ import { discoveryApi } from '../../services/discoveryApi';
 import { memoryApi } from '../../services/memoryApi';
 import type { Chapter, Scene, Character, Location, Discovery, Memory } from '../../types';
 
-export interface ChapterViewProps {
-  novelId: number;
+interface ChapterViewProps {
+  novelId?: number;
+  onFormActivate?: (type: string, data: any, formRef: React.RefObject<HTMLFormElement>) => void;
+  onFormDeactivate?: () => void;
 }
 
-export const ChapterView: React.FC<ChapterViewProps> = ({ novelId }) => {
+export const ChapterView: React.FC<ChapterViewProps> = ({ 
+  novelId,
+  onFormActivate,
+  onFormDeactivate 
+}) => {
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [scenes, setScenes] = useState<Scene[]>([]);
   const [activeChapter, setActiveChapter] = useState<Chapter | null>(null);
@@ -25,6 +31,8 @@ export const ChapterView: React.FC<ChapterViewProps> = ({ novelId }) => {
   const [locations, setLocations] = useState<Location[]>([]);
   const [discoveries, setDiscoveries] = useState<Discovery[]>([]);
   const [memories, setMemories] = useState<Memory[]>([]);
+  const chapterFormRef = useRef<HTMLFormElement>(null);
+  const sceneFormRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
     loadChapters();
@@ -132,6 +140,24 @@ export const ChapterView: React.FC<ChapterViewProps> = ({ novelId }) => {
     }
   };
 
+  const handleFormActivate = (data: Partial<Chapter>) => {
+    console.log('ChapterView: Activating form with data:', data);
+    console.log('ChapterView: Chapter form ref:', chapterFormRef.current);
+    onFormActivate?.('chapter', {
+      ...data,
+      novel_id: novelId
+    }, chapterFormRef);
+  };
+
+  const handleSceneFormActivate = (sceneData: Partial<Scene>) => {
+    console.log('ChapterView: Activating scene form with data:', sceneData);
+    console.log('ChapterView: Scene form ref:', sceneFormRef.current);
+    onFormActivate?.('scene', {
+      ...sceneData,
+      chapter_id: activeChapter?.id
+    }, sceneFormRef);
+  };
+
   if (loading) return <div className="p-4">Loading...</div>;
   if (error) return <div className="p-4 text-red-500">{error}</div>;
 
@@ -154,7 +180,10 @@ export const ChapterView: React.FC<ChapterViewProps> = ({ novelId }) => {
           {/* Chapter Form */}
           <div>
             <ChapterForm
+              ref={chapterFormRef}
               chapter={activeChapter}
+              onActivate={handleFormActivate}
+              onDeactivate={onFormDeactivate}
               novelId={novelId}
               onSubmit={activeChapter ? handleUpdateChapter : handleCreateChapter}
               onCancel={activeChapter ? () => setActiveChapter(null) : undefined}
@@ -168,6 +197,7 @@ export const ChapterView: React.FC<ChapterViewProps> = ({ novelId }) => {
               <div>
                 <h2 className="text-lg font-medium mb-4">Scene Details</h2>
                 <SceneForm
+                  ref={sceneFormRef}
                   scene={activeScene}
                   chapters={chapters}
                   characters={characters}
@@ -176,6 +206,8 @@ export const ChapterView: React.FC<ChapterViewProps> = ({ novelId }) => {
                   memories={memories}
                   onSubmit={activeScene ? handleUpdateScene : handleCreateScene}
                   onCancel={() => setActiveScene(null)}
+                  onActivate={handleSceneFormActivate}
+                  onDeactivate={onFormDeactivate}
                 />
               </div>
             </>

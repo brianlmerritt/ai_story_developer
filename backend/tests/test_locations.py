@@ -6,10 +6,15 @@ def test_create_location(client: TestClient):
         "name": "Crystal Cave",
         "summary": "A mysterious cave system",
         "description": "A vast network of crystalline caves with glowing minerals",
-        "key_details_and_quirks": "Contains rare magical crystals that hum at night"
+        "key_details_and_quirks": "Contains rare magical crystals that hum at night",
+        "status": "draft"
     }
     
-    response = client.post("/locations/", json=location_data)
+    print("\nSending location data:", location_data)
+    response = client.post("/api/locations/", json=location_data)
+    print("Response status:", response.status_code)
+    print("Response body:", response.text)
+    
     assert response.status_code == 200
     data = response.json()
     assert data["name"] == location_data["name"]
@@ -19,25 +24,28 @@ def test_create_location(client: TestClient):
 def test_create_duplicate_location(client: TestClient):
     location_data = {
         "name": "Duplicate Location",
+        "summary": None,
+        "description": None,
+        "key_details_and_quirks": None
     }
     
     # Create first location
-    response = client.post("/locations/", json=location_data)
+    response = client.post("/api/locations/", json=location_data)
     assert response.status_code == 200
     
     # Try to create duplicate
-    response = client.post("/locations/", json=location_data)
+    response = client.post("/api/locations/", json=location_data)
     assert response.status_code == 400
     assert response.json()["detail"] == "Location name already registered"
 
 def test_get_location(client: TestClient):
     # Create a location first
     location_data = {"name": "Test Location"}
-    response = client.post("/locations/", json=location_data)
+    response = client.post("/api/locations/", json=location_data)
     created_location = response.json()
     
     # Test getting the location
-    response = client.get(f"/locations/{created_location['id']}")
+    response = client.get(f"/api/locations/{created_location['id']}")
     assert response.status_code == 200
     data = response.json()
     assert data["name"] == location_data["name"]
@@ -52,17 +60,17 @@ def test_search_locations(client: TestClient):
     ]
     
     for location in locations:
-        client.post("/locations/", json=location)
+        client.post("/api/locations/", json=location)
     
     # Test search by name
-    response = client.get("/locations/?search=Forest")
+    response = client.get("/api/locations/?search=Forest")
     assert response.status_code == 200
     data = response.json()
     assert len(data) == 1
     assert data[0]["name"] == "Mystic Forest"
     
     # Test search by summary
-    response = client.get("/locations/?search=underwater")
+    response = client.get("/api/locations/?search=underwater")
     assert response.status_code == 200
     data = response.json()
     assert len(data) == 1
@@ -74,7 +82,7 @@ def test_update_location(client: TestClient):
         "name": "Original Location",
         "summary": "Original summary"
     }
-    response = client.post("/locations/", json=location_data)
+    response = client.post("/api/locations/", json=location_data)
     created_location = response.json()
     
     # Test updating the location
@@ -84,7 +92,7 @@ def test_update_location(client: TestClient):
         "key_details_and_quirks": "New important details"
     }
     response = client.put(
-        f"/locations/{created_location['id']}", 
+        f"/api/locations/{created_location['id']}", 
         json=update_data
     )
     assert response.status_code == 200
@@ -96,13 +104,13 @@ def test_update_location(client: TestClient):
 def test_delete_location(client: TestClient):
     # Create a location first
     location_data = {"name": "To Be Deleted"}
-    response = client.post("/locations/", json=location_data)
+    response = client.post("/api/locations/", json=location_data)
     created_location = response.json()
     
     # Delete the location
-    response = client.delete(f"/locations/{created_location['id']}")
+    response = client.delete(f"/api/locations/{created_location['id']}")
     assert response.status_code == 200
     
     # Verify location is deleted
-    response = client.get(f"/locations/{created_location['id']}")
+    response = client.get(f"/api/locations/{created_location['id']}")
     assert response.status_code == 404 

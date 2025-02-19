@@ -10,7 +10,7 @@ def test_create_novel(client: TestClient):
         "status": "draft"
     }
     
-    response = client.post("/novels/", json=novel_data)
+    response = client.post("/api/novels/", json=novel_data)
     assert response.status_code == 200
     data = response.json()
     assert data["name"] == novel_data["name"]
@@ -25,7 +25,7 @@ def test_create_novel_minimal(client: TestClient):
         "name": "Minimal Novel"
     }
     
-    response = client.post("/novels/", json=novel_data)
+    response = client.post("/api/novels/", json=novel_data)
     assert response.status_code == 200
     data = response.json()
     assert data["name"] == novel_data["name"]
@@ -36,18 +36,18 @@ def test_create_novel_minimal(client: TestClient):
 def test_get_novel(client: TestClient):
     # Create a novel first
     novel_data = {"name": "Test Novel"}
-    response = client.post("/novels/", json=novel_data)
+    response = client.post("/api/novels/", json=novel_data)
     created_novel = response.json()
     
     # Test getting the novel
-    response = client.get(f"/novels/{created_novel['id']}")
+    response = client.get(f"/api/novels/{int(created_novel['id'])}")
     assert response.status_code == 200
     data = response.json()
     assert data["name"] == novel_data["name"]
     assert data["id"] == created_novel["id"]
 
 def test_get_nonexistent_novel(client: TestClient):
-    response = client.get("/novels/999")
+    response = client.get("/api/novels/999")
     assert response.status_code == 404
     assert response.json()["detail"] == "Novel not found"
 
@@ -60,10 +60,10 @@ def test_get_all_novels(client: TestClient):
     ]
     
     for novel in novels:
-        client.post("/novels/", json=novel)
+        client.post("/api/novels/", json=novel)
     
     # Test getting all novels
-    response = client.get("/novels/")
+    response = client.get("/api/novels/")
     assert response.status_code == 200
     data = response.json()
     assert len(data) == len(novels)
@@ -72,16 +72,16 @@ def test_get_all_novels(client: TestClient):
 def test_update_novel(client: TestClient):
     # Create a novel first
     novel_data = {"name": "Original Name"}
-    response = client.post("/novels/", json=novel_data)
+    response = client.post("/api/novels/", json=novel_data)
     created_novel = response.json()
     
-    # Test updating the novel
+    # Test updating the novel - convert id to int
     update_data = {
         "name": "Updated Name",
         "summary": "New Summary",
         "status": "published"
     }
-    response = client.put(f"/novels/{created_novel['id']}", json=update_data)
+    response = client.put(f"/api/novels/{int(created_novel['id'])}", json=update_data)
     assert response.status_code == 200
     data = response.json()
     assert data["name"] == update_data["name"]
@@ -90,27 +90,27 @@ def test_update_novel(client: TestClient):
 
 def test_update_nonexistent_novel(client: TestClient):
     update_data = {"name": "Updated Name"}
-    response = client.put("/novels/999", json=update_data)
+    response = client.put("/api/novels/999", json=update_data)
     assert response.status_code == 404
     assert response.json()["detail"] == "Novel not found"
 
 def test_delete_novel(client: TestClient):
     # Create a novel first
     novel_data = {"name": "To Be Deleted"}
-    response = client.post("/novels/", json=novel_data)
+    response = client.post("/api/novels/", json=novel_data)
     created_novel = response.json()
     
-    # Test deleting the novel
-    response = client.delete(f"/novels/{created_novel['id']}")
+    # Test deleting the novel - convert id to int
+    response = client.delete(f"/api/novels/{int(created_novel['id'])}")
     assert response.status_code == 200
     assert response.json()["message"] == "Novel deleted successfully"
     
-    # Verify novel is deleted
-    response = client.get(f"/novels/{created_novel['id']}")
+    # Verify novel is deleted - convert id to int
+    response = client.get(f"/api/novels/{int(created_novel['id'])}")
     assert response.status_code == 404
 
 def test_delete_nonexistent_novel(client: TestClient):
-    response = client.delete("/novels/999")
+    response = client.delete("/api/novels/999")
     assert response.status_code == 404
     assert response.json()["detail"] == "Novel not found"
 
@@ -121,7 +121,7 @@ def test_create_novel_invalid_data(client: TestClient):
         "description": "Test Description"
     }
     
-    response = client.post("/novels/", json=novel_data)
+    response = client.post("/api/novels/", json=novel_data)
     assert response.status_code == 422  # Validation error
 
 def test_partial_update_novel(client: TestClient):
@@ -131,12 +131,12 @@ def test_partial_update_novel(client: TestClient):
         "summary": "Original Summary",
         "status": "draft"
     }
-    response = client.post("/novels/", json=novel_data)
+    response = client.post("/api/novels/", json=novel_data)
     created_novel = response.json()
     
     # Test partial update (only update name)
     update_data = {"name": "Updated Name"}
-    response = client.put(f"/novels/{created_novel['id']}", json=update_data)
+    response = client.put(f"/api/novels/{created_novel['id']}", json=update_data)
     assert response.status_code == 200
     data = response.json()
     assert data["name"] == update_data["name"]

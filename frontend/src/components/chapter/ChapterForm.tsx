@@ -1,29 +1,35 @@
-import React, { useState, useEffect } from 'react';
-import type { Chapter } from '../../types';
+import React, { forwardRef, useEffect, useRef, useState } from 'react';
+import type { Chapter, Scene } from '../../types';
 import { AutoResizeTextarea } from '../shared/AutoResizeTextarea';
 import { StatusSelect, type Status } from '../shared/StatusSelect';
+import { SceneForm } from '../scene/SceneForm';
 
 interface ChapterFormProps {
   chapter?: Chapter | null;
-  novelId: number;
   onSubmit: (data: Partial<Chapter>) => void;
   onCancel?: () => void;
+  onActivate?: (data: Partial<Chapter>) => void;
+  onDeactivate?: () => void;
 }
 
-export const ChapterForm: React.FC<ChapterFormProps> = ({
+export const ChapterForm = forwardRef<HTMLFormElement, ChapterFormProps>(({
   chapter,
-  novelId,
   onSubmit,
   onCancel,
-}) => {
+  onActivate,
+  onDeactivate
+}, ref) => {
   const [formData, setFormData] = useState<Partial<Chapter>>({
     title: '',
     summary: '',
     sequence: '',
     description: '',
-    novel_id: novelId,
-    status: 'draft' as Status
+    status: 'draft' as Status,
   });
+
+  // Ref for the embedded SceneForm
+  const sceneFormRef = useRef<HTMLFormElement>(null);
+  const [activeScene, setActiveScene] = useState<Scene | null>(null);
 
   useEffect(() => {
     if (chapter) {
@@ -31,50 +37,58 @@ export const ChapterForm: React.FC<ChapterFormProps> = ({
         ...chapter,
         status: chapter.status || 'draft' as Status,
       });
-    } else {
-      setFormData({
-        title: '',
-        summary: '',
-        sequence: '',
-        description: '',
-        novel_id: novelId,
-        status: 'draft' as Status
-      });
     }
-  }, [chapter, novelId]);
+  }, [chapter]);
+
+  // Notify parent when form becomes active
+  useEffect(() => {
+    onActivate?.(formData);
+    return () => onDeactivate?.();
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit({
-      ...formData,
-      status: formData.status || 'draft',
-    });
+    onSubmit(formData);
   };
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  const handleChange = (field: keyof Chapter) => (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData(prev => ({
+      ...prev,
+      [field]: e.target.value
+    }));
+  };
+
+  // Handle scene form activation separately
+  const handleSceneFormActivate = (sceneData: Partial<Scene>) => {
+    // We don't want to activate the scene form in the AI Wizard
+    // if the chapter form is already active
+    if (!onActivate) {
+      onActivate?.({
+        ...formData,
+        activeScene: sceneData
+      });
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-6 h-full overflow-auto">
+    <form ref={ref} onSubmit={handleSubmit} className="p-6 h-full overflow-auto">
       <div className="max-w-4xl mx-auto space-y-4">
         <div className="flex gap-4">
           <div className="flex-1">
-            <label className="block text-sm font-medium text-gray-700">Title</label>
+            <label className="block text-sm font-medium mb-1">Title</label>
             <input
               type="text"
               name="title"
               value={formData.title || ''}
-              onChange={handleChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              onChange={handleChange('title')}
+              className="w-full rounded-lg border p-2"
               required
             />
           </div>
           <div className="flex-1">
-            <label className="block text-sm font-medium text-gray-700">Status</label>
+            <label className="block text-sm font-medium mb-1">Status</label>
             <StatusSelect
               value={formData.status || ''}
               onChange={(status) => setFormData(prev => ({ ...prev, status }))}
@@ -84,25 +98,25 @@ export const ChapterForm: React.FC<ChapterFormProps> = ({
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Summary</label>
-          <AutoResizeTextarea
-            name="summary"
-            value={formData.summary || ''}
-            onChange={handleChange}
-            className="w-full rounded-lg border p-2 resize-y min-h-[3em]"
-            minRows={3}
-          />
-        </div>
-
-        <div>
           <label className="block text-sm font-medium mb-1">Sequence (optional)</label>
           <input
             type="text"
             name="sequence"
             value={formData.sequence || ''}
-            onChange={handleChange}
+            onChange={handleChange('sequence')}
             className="w-full rounded-lg border p-2"
             placeholder="e.g., 1, 2, 2.1"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">Summary</label>
+          <AutoResizeTextarea
+            name="summary"
+            value={formData.summary || ''}
+            onChange={handleChange('summary')}
+            className="w-full rounded-lg border p-2 resize-y min-h-[3em]"
+            minRows={3}
           />
         </div>
 
@@ -111,11 +125,26 @@ export const ChapterForm: React.FC<ChapterFormProps> = ({
           <AutoResizeTextarea
             name="description"
             value={formData.description || ''}
-            onChange={handleChange}
+            onChange={handleChange('description')}
             className="w-full rounded-lg border p-2 resize-y min-h-[3em]"
             minRows={3}
           />
         </div>
+
+        {/* Embedded Scene Form */}
+        {activeScene && (
+          <div className="border-t pt-4 mt-4">
+            <h3 className="text-lg font-medium mb-4">Scene Details</h3>
+            <SceneForm
+              ref={sceneFormRef}
+              scene={activeScene}
+              onActivate={handleSceneFormActivate}
+              onDeactivate={() => {}} // No-op to prevent conflicts with chapter form
+              chapters={[chapter].filter(Boolean) as Chapter[]}
+              // ... other scene form props
+            />
+          </div>
+        )}
 
         <div className="flex justify-end gap-2 pt-4">
           {onCancel && (
@@ -137,4 +166,6 @@ export const ChapterForm: React.FC<ChapterFormProps> = ({
       </div>
     </form>
   );
-}; 
+});
+
+export default ChapterForm; 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import type { Scene, Chapter, Character, Location, Discovery, Memory } from '../../types';
 import { AutoResizeTextarea } from '../shared/AutoResizeTextarea';
 import { StatusSelect, type Status } from '../shared/StatusSelect';
@@ -13,9 +13,11 @@ interface SceneFormProps {
   memories: Memory[];
   onSubmit: (data: Partial<Scene>) => void;
   onCancel?: () => void;
+  onActivate?: (data: Partial<Scene>) => void;
+  onDeactivate?: () => void;
 }
 
-export const SceneForm: React.FC<SceneFormProps> = ({
+export const SceneForm = forwardRef<HTMLFormElement, SceneFormProps>(({
   scene,
   chapters = [],
   characters = [],
@@ -24,7 +26,9 @@ export const SceneForm: React.FC<SceneFormProps> = ({
   memories = [],
   onSubmit,
   onCancel,
-}) => {
+  onActivate,
+  onDeactivate
+}, ref) => {
   const [formData, setFormData] = useState<Partial<Scene>>({
     name: '',
     content: '',
@@ -58,6 +62,12 @@ export const SceneForm: React.FC<SceneFormProps> = ({
     }
   }, [chapters, scene]);
 
+  // Notify parent when form becomes active
+  useEffect(() => {
+    onActivate?.(formData);
+    return () => onDeactivate?.();
+  }, []);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit(formData);
@@ -73,7 +83,7 @@ export const SceneForm: React.FC<SceneFormProps> = ({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-6 h-full overflow-auto">
+    <form ref={ref} onSubmit={handleSubmit} className="p-6 h-full overflow-auto">
       <div className="max-w-4xl mx-auto space-y-4">
         <div className="flex gap-4">
           <div className="flex-1">
@@ -253,6 +263,6 @@ export const SceneForm: React.FC<SceneFormProps> = ({
       </div>
     </form>
   );
-};
+});
 
 export default SceneForm; 
